@@ -48,7 +48,7 @@ class Metadata(BaseModel):
     """Work directory list."""
 
     def get_work_dir_meta(self, path: KaosPath) -> WorkDirMeta | None:
-        """Get the metadata for a work directory."""
+        """获取工作目录的元数据。"""
         for wd in self.work_dirs:
             if wd.path == str(path) and wd.kaos == get_current_kaos().name:
                 return wd

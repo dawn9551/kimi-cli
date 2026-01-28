@@ -88,6 +88,9 @@ class TurnOutcome:
 
 class KimiSoul:
     """The soul of Kimi CLI."""
+    """
+    1. 负责管理对话上下文、执行工具、处理LLM的流式输出以及协调子代理
+    """
 
     def __init__(
         self,

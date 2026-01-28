@@ -68,36 +68,29 @@ class KimiCLI:
         flow: PromptFlow | None = None,
     ) -> KimiCLI:
         """
-        Create a KimiCLI instance.
+        创建一个 KimiCLI 实例。
 
-        Args:
-            session (Session): A session created by `Session.create` or `Session.continue_`.
-            config (Config | Path | None, optional): Configuration to use, or path to config file.
-                Defaults to None.
-            model_name (str | None, optional): Name of the model to use. Defaults to None.
-            thinking (bool | None, optional): Whether to enable thinking mode. Defaults to None.
-            yolo (bool, optional): Approve all actions without confirmation. Defaults to False.
-            agent_file (Path | None, optional): Path to the agent file. Defaults to None.
-            mcp_configs (list[MCPConfig | dict[str, Any]] | None, optional): MCP configs to load
-                MCP tools from. Defaults to None.
-            skills_dir (KaosPath | None, optional): Override skills directory discovery. Defaults
-                to None.
-            max_steps_per_turn (int | None, optional): Maximum number of steps in one turn.
-                Defaults to None.
-            max_retries_per_step (int | None, optional): Maximum number of retries in one step.
-                Defaults to None.
-            max_ralph_iterations (int | None, optional): Extra iterations after the first turn in
-                Ralph mode. Defaults to None.
-            flow (PromptFlow | None, optional): Prompt flow to execute. Defaults to None.
+        参数:
+            session (Session): 通过 `Session.create` 或 `Session.continue_` 创建的会话。
+            config (Config | Path | None, 可选): 要使用的配置，或配置文件路径。默认为 None。
+            model_name (str | None, 可选): 要使用的模型名称。默认为 None。
+            thinking (bool | None, 可选): 是否启用思考模式。默认为 None。
+            yolo (bool, 可选): 是否无须确认批准所有操作。默认为 False。
+            agent_file (Path | None, 可选): 代理文件路径。默认为 None。
+            mcp_configs (list[MCPConfig | dict[str, Any]] | None, 可选): 加载 MCP 工具所需的 MCP 配置列表。默认为 None。
+            skills_dir (KaosPath | None, 可选): 覆盖技能目录的发现路径。默认为 None。
+            max_steps_per_turn (int | None, 可选): 每回合的最大步数。默认为 None。
+            max_retries_per_step (int | None, 可选): 每步的最大重试次数。默认为 None。
+            max_ralph_iterations (int | None, 可选): Ralph 模式下，首回合后的额外迭代次数。默认为 None。
+            flow (PromptFlow | None, 可选): 要执行的提示流程。默认为 None。
 
-        Raises:
-            FileNotFoundError: When the agent file is not found.
-            ConfigError(KimiCLIException, ValueError): When the configuration is invalid.
-            AgentSpecError(KimiCLIException, ValueError): When the agent specification is invalid.
-            InvalidToolError(KimiCLIException, ValueError): When any tool cannot be loaded.
-            MCPConfigError(KimiCLIException, ValueError): When any MCP configuration is invalid.
-            MCPRuntimeError(KimiCLIException, RuntimeError): When any MCP server cannot be
-                connected.
+        异常:
+            FileNotFoundError: 未找到代理文件时抛出。
+            ConfigError(KimiCLIException, ValueError): 配置无效时抛出。
+            AgentSpecError(KimiCLIException, ValueError): 代理规范无效时抛出。
+            InvalidToolError(KimiCLIException, ValueError): 某些工具无法加载时抛出。
+            MCPConfigError(KimiCLIException, ValueError): 有无效 MCP 配置时抛出。
+            MCPRuntimeError(KimiCLIException, RuntimeError): 无法连接到某个 MCP 服务端时抛出。
         """
         config = config if isinstance(config, Config) else load_config(config)
         if max_steps_per_turn is not None:

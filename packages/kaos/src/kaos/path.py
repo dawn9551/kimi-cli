@@ -81,8 +81,8 @@ class KaosPath:
 
     def canonical(self) -> KaosPath:
         """
-        Make the path absolute, resolving all `.` and `..` in the path.
-        Unlike `pathlib.Path.resolve`, this method does not resolve symlinks.
+        # 使路径变为绝对路径，解析路径中的 `.` 和 `..`。
+        # 与 `pathlib.Path.resolve` 不同，本方法不会解析符号链接（symlink）。
         """
         abs_path = self if self.is_absolute() else kaos.getcwd().joinpath(str(self._path))
         # Normalize the path (handle . and ..) but preserve the format

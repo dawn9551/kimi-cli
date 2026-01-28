@@ -19,7 +19,7 @@ class Context:
         self._history: list[Message] = []
         self._token_count: int = 0
         self._next_checkpoint_id: int = 0
-        """The ID of the next checkpoint, starting from 0, incremented after each checkpoint."""
+        """下一个检查点的 ID，从 0 开始，每次检查点后递增。"""
 
     async def restore(self) -> bool:
         logger.debug("Restoring context from file: {file_backend}", file_backend=self._file_backend)
@@ -79,16 +79,15 @@ class Context:
 
     async def revert_to(self, checkpoint_id: int):
         """
-        Revert the context to the specified checkpoint.
-        After this, the specified checkpoint and all subsequent content will be
-        removed from the context. File backend will be rotated.
+        回滚上下文到指定的检查点。
+        在此之后，指定检查点及其之后的所有内容都将被从上下文中移除。文件后端将被轮换。
 
-        Args:
-            checkpoint_id (int): The ID of the checkpoint to revert to. 0 is the first checkpoint.
+        参数:
+            checkpoint_id (int): 要回滚到的检查点 ID。0 表示第一个检查点。
 
-        Raises:
-            ValueError: When the checkpoint does not exist.
-            RuntimeError: When no available rotation path is found.
+        异常:
+            ValueError: 当指定的检查点不存在时抛出。
+            RuntimeError: 当找不到可用的轮换路径时抛出。
         """
 
         logger.debug("Reverting checkpoint, ID: {id}", id=checkpoint_id)
@@ -133,13 +132,12 @@ class Context:
 
     async def clear(self):
         """
-        Clear the context history.
-        This is almost equivalent to revert_to(0), but without relying on the assumption
-        that the first checkpoint exists.
-        File backend will be rotated.
+        清除上下文历史记录。
+        这几乎等同于 revert_to(0)，但不依赖于第一个检查点一定存在的假设。
+        将会轮转文件后端。
 
-        Raises:
-            RuntimeError: When no available rotation path is found.
+        异常:
+            RuntimeError: 当没有可用的轮转路径时抛出。
         """
 
         logger.debug("Clearing context")

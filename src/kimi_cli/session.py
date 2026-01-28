@@ -20,45 +20,45 @@ from kimi_cli.wire.types import TurnBegin
 
 @dataclass(slots=True, kw_only=True)
 class Session:
-    """A session of a work directory."""
+    """工作目录的一个会话。"""
 
-    # static metadata
+    # 静态元数据
     id: str
-    """The session ID."""
+    """会话 ID。"""
     work_dir: KaosPath
-    """The absolute path of the work directory."""
+    """工作目录的绝对路径。"""
     work_dir_meta: WorkDirMeta
-    """The metadata of the work directory."""
+    """工作目录的元数据。"""
     context_file: Path
-    """The absolute path to the file storing the message history."""
+    """存储消息历史记录的文件的绝对路径。"""
 
-    # refreshable metadata
+    # 可刷新元数据
     title: str
-    """The title of the session."""
+    """会话的标题。"""
     updated_at: float
-    """The timestamp of the last update to the session."""
+    """会话最后一次更新的时间戳。"""
 
     @property
     def dir(self) -> Path:
-        """The absolute path of the session directory."""
+        """会话目录的绝对路径。"""
         path = self.work_dir_meta.sessions_dir / self.id
         path.mkdir(parents=True, exist_ok=True)
         return path
 
     @property
     def wire_file(self) -> Path:
-        """The file backend for persisting Wire messages."""
+        """用于持久化 Wire 消息的文件后端。"""
         return self.dir / "wire.jsonl"
 
     def is_empty(self) -> bool:
-        """Whether the session has any context history."""
+        """检查会话是否有任何上下文历史记录。"""
         try:
             return self.context_file.stat().st_size == 0
         except FileNotFoundError:
             return True
 
     async def delete(self) -> None:
-        """Delete the session directory."""
+        """删除会话目录。"""
         session_dir = self.work_dir_meta.sessions_dir / self.id
         if not session_dir.exists():
             return
@@ -102,7 +102,7 @@ class Session:
         session_id: str | None = None,
         _context_file: Path | None = None,
     ) -> Session:
-        """Create a new session for a work directory."""
+        """为工作目录创建一个新会话。"""
         work_dir = work_dir.canonical()
         logger.debug("Creating new session for work directory: {work_dir}", work_dir=work_dir)
 
@@ -128,7 +128,7 @@ class Session:
             context_file = _context_file
 
         if context_file.exists():
-            # truncate if exists
+            # 如果已存在则截断
             logger.warning(
                 "Context file already exists, truncating: {context_file}", context_file=context_file
             )
@@ -150,7 +150,7 @@ class Session:
 
     @staticmethod
     async def find(work_dir: KaosPath, session_id: str) -> Session | None:
-        """Find a session by work directory and session ID."""
+        """通过工作目录和会话 ID 查找会话。"""
         work_dir = work_dir.canonical()
         logger.debug(
             "Finding session for work directory: {work_dir}, session ID: {session_id}",
@@ -191,7 +191,7 @@ class Session:
 
     @staticmethod
     async def list(work_dir: KaosPath) -> builtins.list[Session]:
-        """List all sessions for a work directory."""
+        """列出工作目录的所有会话。"""
         work_dir = work_dir.canonical()
         logger.debug("Listing sessions for work directory: {work_dir}", work_dir=work_dir)
 
@@ -240,7 +240,7 @@ class Session:
 
     @staticmethod
     async def continue_(work_dir: KaosPath) -> Session | None:
-        """Get the last session for a work directory."""
+        """获取工作目录的最后一个会话。"""
         work_dir = work_dir.canonical()
         logger.debug("Continuing session for work directory: {work_dir}", work_dir=work_dir)
 

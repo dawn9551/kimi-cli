@@ -599,4 +599,5 @@ if __name__ == "__main__":
     if "kimi_cli.cli" not in sys.modules:
         sys.modules["kimi_cli.cli"] = sys.modules[__name__]
 
+    # cli() 实际调用了typer.Typer的 __call__方法
     sys.exit(cli())

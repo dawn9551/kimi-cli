@@ -15,14 +15,11 @@ class MergeableMixin:
 
 class ContentPart(BaseModel, ABC, MergeableMixin):
     """
-    A part of a message content.
+    消息内容的一个部分。
 
-    This is the abstract base class for all supported content parts. Subclasses must define a `type`
-    field of type `str` and optional other fields specific to the content part.
+    这是所有支持的内容部分的抽象基类。子类必须定义一个类型为 `str` 的 `type` 字段，以及特定于该内容部分的其他可选字段。
 
-    For Kosong users, you typically do not need to subclass this directly. Instead, use the provided
-    subclasses like `TextPart`, `ThinkPart`, `ImageURLPart`, etc. Unless you are implementing custom
-    `ChatProvider`s that supports new content part types.
+    对于 Kosong 的用户，通常无需直接继承此类。请使用如 `TextPart`、`ThinkPart`、`ImageURLPart` 等已提供的子类。除非你要实现自定义的支持新内容部分类型的 `ChatProvider`。
     """
 
     __content_part_registry: ClassVar[dict[str, type["ContentPart"]]] = {}
@@ -250,15 +247,15 @@ class Message(BaseModel):
 
     content: list[ContentPart]
     """
-    The content of the message.
-    Empty list `[]` will be interpreted as no content.
+    消息内容。
+    空列表 `[]` 会被解释为没有内容。
     """
 
     tool_calls: list[ToolCall] | None = None
-    """Tool calls requested by the assistant in this message."""
+    """工具调用请求。"""
 
     tool_call_id: str | None = None
-    """The ID of the tool call if this message is a tool response."""
+    """工具调用的 ID，如果此消息是工具响应。"""
 
     partial: bool | None = None
 
