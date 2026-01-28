@@ -104,7 +104,7 @@ class KaosPath:
 
     @classmethod
     def cwd(cls) -> KaosPath:
-        """Return the current working directory as a KaosPath."""
+        """返回当前工作目录，类型为 KaosPath。"""
         return kaos.getcwd()
 
     def expanduser(self) -> KaosPath:

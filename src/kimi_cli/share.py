@@ -7,5 +7,4 @@ def get_share_dir() -> Path:
     """Get the share directory path."""
     share_dir = Path.home() / ".kimi"
     share_dir.mkdir(parents=True, exist_ok=True)
-    print(f"get_share_dir: {share_dir}")
     return share_dir

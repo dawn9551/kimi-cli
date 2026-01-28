@@ -83,6 +83,7 @@ class Runtime:
         yolo: bool,
         skills_dir: KaosPath | None = None,
     ) -> Runtime:
+        breakpoint()
         ls_output, agents_md, environment = await asyncio.gather(
             list_directory(session.work_dir),
             load_agents_md(session.work_dir),
@@ -209,6 +210,7 @@ async def load_agent(
         agent_spec.system_prompt_args,
         runtime.builtin_args,
     )
+    breakpoint()
 
     # load subagents before loading tools because Task tool depends on LaborMarket on initialization
     for subagent_name, subagent_spec in agent_spec.subagents.items():

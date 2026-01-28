@@ -410,7 +410,7 @@ def kimi(
     file_configs = list(mcp_config_file or [])
     raw_mcp_config = list(mcp_config or [])
 
-    # Use default MCP config file if no MCP config is provided
+    # 如果没有提供 MCP 配置，则使用默认的 MCP 配置文件
     if not file_configs:
         default_mcp_file = get_global_mcp_config_file()
         if default_mcp_file.exists():
