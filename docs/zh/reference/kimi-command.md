@@ -1,6 +1,6 @@
 # `kimi` 命令
 
-`kimi` 是 Kimi CLI 的主命令，用于启动交互式会话或执行单次查询。
+`kimi` 是 Kimi Code CLI 的主命令，用于启动交互式会话或执行单次查询。
 
 ```sh
 kimi [OPTIONS] COMMAND [ARGS]
@@ -45,7 +45,7 @@ kimi [OPTIONS] COMMAND [ARGS]
 |------|------|------|
 | `--work-dir PATH` | `-w` | 指定工作目录（默认当前目录） |
 
-工作目录决定了文件操作的根目录，Agent 只能在此目录内读写文件。
+工作目录决定了文件操作的根目录。在工作目录内可使用相对路径，操作工作目录外的文件需使用绝对路径。
 
 ## 会话管理
 
@@ -63,7 +63,7 @@ kimi [OPTIONS] COMMAND [ARGS]
 | `--prompt TEXT` | `-p` | 传入用户提示，不进入交互模式 |
 | `--command TEXT` | `-c` | `--prompt` 的别名 |
 
-使用 `--prompt`（或 `--command`）时，Kimi CLI 会处理完查询后退出（除非指定 `--print`，否则仍以交互模式显示结果）。
+使用 `--prompt`（或 `--command`）时，Kimi Code CLI 会处理完查询后退出（除非指定 `--print`，否则仍以交互模式显示结果）。
 
 ## 循环控制
 
@@ -77,57 +77,7 @@ kimi [OPTIONS] COMMAND [ARGS]
 
 [Ralph](https://ghuntley.com/ralph/) 是一种把 Agent 放进循环的技术：同一条提示词会被反复喂给 Agent，让它围绕一个任务持续迭代。
 
-当 `--max-ralph-iterations` 非 `0` 时，Kimi CLI 会进入 Ralph 循环模式，基于内置的 Prompt Flow 自动循环执行任务，直到 Agent 输出 `<choice>STOP</choice>` 或达到迭代上限。
-
-::: info 注意
-Ralph 循环与 `--prompt-flow` 选项互斥，不能同时使用。
-:::
-
-## Prompt Flow
-
-| 选项 | 说明 |
-|------|------|
-| `--prompt-flow PATH` | 加载 D2（`.d2`）或 Mermaid（`.mmd`）流程图文件作为 Prompt Flow |
-
-Prompt Flow 是一种基于流程图的提示词工作流描述方式，每个节点对应一次对话轮次。加载后，可以通过 `/begin` 斜杠命令启动流程执行。目前支持 D2 和 Mermaid 两种流程图格式。可以在 [D2 Playground](https://play.d2lang.com) 编辑和预览 D2 流程图，在 [Mermaid Playground](https://www.mermaidchart.com/play) 编辑和预览 Mermaid 流程图。
-
-D2 流程图示例（`example.d2` 文件）：
-
-```
-BEGIN -> B -> C
-B: 分析现有代码，为 XXX 功能在 design.md 文件中编写设计文档
-C: Review 一遍 design.md，看看是否足够详细
-C -> B: 否
-C -> D: 是
-D: 开始实现
-D -> END
-```
-
-Mermaid 流程图示例（`example.mmd` 文件）：
-
-```
-flowchart TD
-A([BEGIN]) --> B[分析现有代码，为 XXX 功能在 design.md 文件中编写设计文档]
-B --> C{Review 一遍 design.md，看看是否足够详细}
-C -->|是| D[开始实现]
-C -->|否| B
-D --> F([END])
-```
-
-```mermaid
-flowchart TD
-A([BEGIN]) --> B[分析现有代码，为 XXX 功能在 design.md 文件中编写设计文档]
-B --> C{Review 一遍 design.md，看看是否足够详细}
-C -->|是| D[开始实现]
-C -->|否| B
-D --> F([END])
-```
-
-在节点处理过程中，分支节点会要求 Agent 输出 `<choice>分支名</choice>` 来选择下一个节点。
-
-::: info 注意
-`--prompt-flow` 与 Ralph 循环模式互斥，不能同时使用。
-:::
+当 `--max-ralph-iterations` 非 `0` 时，Kimi Code CLI 会进入 Ralph 循环模式，自动循环执行任务，直到 Agent 输出 `<choice>STOP</choice>` 或达到迭代上限。
 
 ## UI 模式
 
@@ -186,15 +136,33 @@ Thinking 模式需要模型支持。如果不指定，使用上次会话的设�
 
 | 选项 | 说明 |
 |------|------|
-| `--skills-dir PATH` | 指定 skills 目录（默认 `~/.kimi/skills`） |
+| `--skills-dir PATH` | 指定 skills 目录，跳过自动发现 |
 
-详见 [Agent Skills](../customization/skills.md)。
+不指定时，Kimi Code CLI 会按优先级自动发现用户级和项目级 Skills 目录。详见 [Agent Skills](../customization/skills.md)。
 
 ## 子命令
 
 | 子命令 | 说明 |
 |--------|------|
+| [`kimi login`](#kimi-login) | 登录 Kimi 账号 |
+| [`kimi logout`](#kimi-logout) | 登出 Kimi 账号 |
 | [`kimi info`](./kimi-info.md) | 显示版本和协议信息 |
 | [`kimi acp`](./kimi-acp.md) | 启动多会话 ACP 服务器 |
 | [`kimi mcp`](./kimi-mcp.md) | 管理 MCP 服务器配置 |
 | [`kimi term`](./kimi-term.md) | 启动 Toad 终端 UI |
+
+### `kimi login`
+
+登录 Kimi 账号。执行后会自动打开浏览器，完成账号授权后自动配置可用的模型。
+
+```sh
+kimi login
+```
+
+### `kimi logout`
+
+登出 Kimi 账号。会清理存储的 OAuth 凭据并移除配置文件中的相关配置。
+
+```sh
+kimi logout
+```

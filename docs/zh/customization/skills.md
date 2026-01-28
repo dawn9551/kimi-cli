@@ -1,16 +1,16 @@
 # Agent Skills
 
-[Agent Skills](https://agentskills.io/) 是一个开放格式，用于为 AI Agent 添加专业知识和工作流程。Kimi CLI 支持加载 Agent Skills，扩展 AI 的能力。
+[Agent Skills](https://agentskills.io/) 是一个开放格式，用于为 AI Agent 添加专业知识和工作流程。Kimi Code CLI 支持加载 Agent Skills，扩展 AI 的能力。
 
 ## Agent Skills 是什么
 
-一个 Skill 就是一个包含 `SKILL.md` 文件的目录。Kimi CLI 启动时会发现所有 Skills，并将它们的名称、路径和描述注入到系统提示词中。AI 会根据当前任务的需要，自行决定是否读取具体的 `SKILL.md` 文件来获取详细指引。
+一个 Skill 就是一个包含 `SKILL.md` 文件的目录。Kimi Code CLI 启动时会发现所有 Skills，并将它们的名称、路径和描述注入到系统提示词中。AI 会根据当前任务的需要，自行决定是否读取具体的 `SKILL.md` 文件来获取详细指引。
 
 例如，你可以创建一个「代码风格」Skill，告诉 AI 你项目的命名规范、注释风格等；或者创建一个「安全审计」Skill，让 AI 在审查代码时关注特定的安全问题。
 
 ## Skill 发现
 
-Kimi CLI 采用分层加载机制发现 Skills，按以下优先级加载（后加载的会覆盖同名 Skill）：
+Kimi Code CLI 采用分层加载机制发现 Skills，按以下优先级加载（后加载的会覆盖同名 Skill）：
 
 **内置 Skills**
 
@@ -18,19 +18,22 @@ Kimi CLI 采用分层加载机制发现 Skills，按以下优先级加载（后�
 
 **用户级 Skills**
 
-存放在用户主目录中，在所有项目中生效。Kimi CLI 会按优先级检查以下目录，使用第一个存在的目录：
+存放在用户主目录中，在所有项目中生效。Kimi Code CLI 会按优先级检查以下目录，使用第一个存在的目录：
 
 1. `~/.config/agents/skills/`（推荐）
-2. `~/.kimi/skills/`（兼容旧版）
-3. `~/.claude/skills/`（兼容 Claude）
+2. `~/.agents/skills/`
+3. `~/.kimi/skills/`
+4. `~/.claude/skills/`
+5. `~/.codex/skills/`
 
 **项目级 Skills**
 
-存放在项目目录中，仅在该项目工作目录下生效。Kimi CLI 会按优先级检查以下目录，使用第一个存在的目录：
+存放在项目目录中，仅在该项目工作目录下生效。Kimi Code CLI 会按优先级检查以下目录，使用第一个存在的目录：
 
 1. `.agents/skills/`（推荐）
-2. `.kimi/skills/`（兼容旧版）
-3. `.claude/skills/`（兼容 Claude）
+2. `.kimi/skills/`
+3. `.claude/skills/`
+4. `.codex/skills/`
 
 你也可以通过 `--skills-dir` 参数指定其他目录，此时会跳过用户级和项目级 Skills 的发现：
 
@@ -40,9 +43,9 @@ kimi --skills-dir /path/to/my-skills
 
 ## 内置 Skills
 
-Kimi CLI 内置了以下 Skills：
+Kimi Code CLI 内置了以下 Skills：
 
-- **kimi-cli-help**：Kimi CLI 帮助。解答关于 Kimi CLI 安装、配置、斜杠命令、键盘快捷键、MCP 集成、供应商、环境变量等问题。
+- **kimi-cli-help**：Kimi Code CLI 帮助。解答关于 Kimi Code CLI 安装、配置、斜杠命令、键盘快捷键、MCP 集成、供应商、环境变量等问题。
 - **skill-creator**：Skill 创建指南。当你需要创建新的 Skill（或更新现有 Skill）来扩展 Kimi 的能力时，可以使用此 Skill 获取详细的创建指导和最佳实践。
 
 ## 创建 Skill
@@ -174,7 +177,7 @@ description: Git 提交信息规范，使用 Conventional Commits 格式
 
 ## 使用斜杠命令加载 Skill
 
-`/skill:<name>` 斜杠命令让你可以将常用的提示词模板保存为 Skill，需要时快速调用。输入命令后，Kimi CLI 会读取对应的 `SKILL.md` 文件内容，并将其作为提示词发送给 Agent。
+`/skill:<name>` 斜杠命令让你可以将常用的提示词模板保存为 Skill，需要时快速调用。输入命令后，Kimi Code CLI 会读取对应的 `SKILL.md` 文件内容，并将其作为提示词发送给 Agent。
 
 例如：
 
@@ -189,3 +192,78 @@ description: Git 提交信息规范，使用 Conventional Commits 格式
 :::
 
 Skills 让你可以将团队的最佳实践和项目规范固化下来，确保 AI 始终遵循一致的标准。
+
+## Flow Skills
+
+Flow Skill 是一种特殊的 Skill 类型，它在 `SKILL.md` 中内嵌 Agent Flow 流程图，用于定义多步骤的自动化工作流。与普通 Skill 不同，Flow Skill 通过 `/flow:<name>` 命令调用，会按照流程图自动执行多个对话轮次。
+
+**创建 Flow Skill**
+
+创建 Flow Skill 需要在 Frontmatter 中设置 `type: flow`，并在内容中包含 Mermaid 或 D2 格式的流程图代码块：
+
+````markdown
+---
+name: code-review
+description: 代码审查工作流
+type: flow
+---
+
+```mermaid
+flowchart TD
+A([BEGIN]) --> B[分析代码变更，列出所有修改的文件和功能]
+B --> C{代码质量是否达标？}
+C -->|是| D[生成代码审查报告]
+C -->|否| E[列出问题并提出改进建议]
+E --> B
+D --> F([END])
+```
+````
+
+**流程图格式**
+
+支持 Mermaid 和 D2 两种格式：
+
+- **Mermaid**：使用 ` ```mermaid ` 代码块，[Mermaid Playground](https://www.mermaidchart.com/play) 可用于编辑和预览
+- **D2**：使用 ` ```d2 ` 代码块，[D2 Playground](https://play.d2lang.com) 可用于编辑和预览
+
+流程图必须包含一个 `BEGIN` 节点和一个 `END` 节点。普通节点的文本作为提示词发送给 Agent；分支节点需要 Agent 在输出中使用 `<choice>分支名</choice>` 选择下一步。
+
+**D2 格式示例**
+
+```
+BEGIN -> B -> C
+B: 分析现有代码，为 XXX 功能编写设计文档
+C: Review 设计文档是否足够详细
+C -> B: 否
+C -> D: 是
+D: 开始实现
+D -> END
+```
+
+对于多行标签，可以使用 D2 的块字符串语法（`|md`）：
+
+```
+BEGIN -> step -> END
+step: |md
+  # 详细指引
+
+  1. 分析代码结构
+  2. 检查潜在问题
+  3. 生成报告
+|
+```
+
+**执行 Flow Skill**
+
+Flow Skill 可以通过两种方式调用：
+
+- `/flow:<name>`：执行流程，Agent 会从 `BEGIN` 节点开始，按照流程图定义依次处理每个节点，直到到达 `END` 节点
+- `/skill:<name>`：与普通 Skill 一样，将 `SKILL.md` 内容作为提示词发送给 Agent（不自动执行流程）
+
+```sh
+# 执行流程
+/flow:code-review
+
+# 作为普通 Skill 加载
+/skill:code-review
+```

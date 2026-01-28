@@ -1,10 +1,10 @@
 # 配置文件
 
-Kimi CLI 使用配置文件管理 API 供应商、模型、服务和运行参数，支持 TOML 和 JSON 两种格式。
+Kimi Code CLI 使用配置文件管理 API 供应商、模型、服务和运行参数，支持 TOML 和 JSON 两种格式。
 
 ## 配置文件位置
 
-默认配置文件位于 `~/.kimi/config.toml`。首次运行时，如果配置文件不存在，Kimi CLI 会自动创建一个默认的配置文件。
+默认配置文件位于 `~/.kimi/config.toml`。首次运行时，如果配置文件不存在，Kimi Code CLI 会自动创建一个默认的配置文件。
 
 你可以通过 `--config-file` 参数指定其他配置文件（TOML 或 JSON 格式均可）：
 
@@ -12,7 +12,7 @@ Kimi CLI 使用配置文件管理 API 供应商、模型、服务和运行参数
 kimi --config-file /path/to/config.toml
 ```
 
-在程序化调用 Kimi CLI 时，也可以通过 `--config` 参数直接传入完整的配置内容：
+在程序化调用 Kimi Code CLI 时，也可以通过 `--config` 参数直接传入完整的配置内容：
 
 ```sh
 kimi --config '{"default_model": "kimi-for-coding", "providers": {...}, "models": {...}}'
@@ -52,6 +52,7 @@ max_context_size = 262144
 max_steps_per_turn = 100
 max_retries_per_step = 3
 max_ralph_iterations = 0
+reserved_context_size = 50000
 
 [services.moonshot_search]
 base_url = "https://api.kimi.com/coding/v1/search"
@@ -117,10 +118,11 @@ capabilities = ["thinking", "image_in"]
 | `max_steps_per_turn` | `integer` | `100` | 单轮最大步数（别名：`max_steps_per_run`） |
 | `max_retries_per_step` | `integer` | `3` | 单步最大重试次数 |
 | `max_ralph_iterations` | `integer` | `0` | 每个 User 消息后额外自动迭代次数；`0` 表示关闭；`-1` 表示无限 |
+| `reserved_context_size` | `integer` | `50000` | 预留给 LLM 响应生成的 token 数量；当 `context_tokens + reserved_context_size >= max_context_size` 时自动触发压缩 |
 
 ### `services`
 
-`services` 配置 Kimi CLI 使用的外部服务。
+`services` 配置 Kimi Code CLI 使用的外部服务。
 
 #### `moonshot_search`
 
@@ -156,6 +158,6 @@ capabilities = ["thinking", "image_in"]
 
 ## JSON 配置迁移
 
-如果 `~/.kimi/config.toml` 不存在但 `~/.kimi/config.json` 存在，Kimi CLI 会自动将 JSON 配置迁移到 TOML 格式，并将原文件备份为 `config.json.bak`。
+如果 `~/.kimi/config.toml` 不存在但 `~/.kimi/config.json` 存在，Kimi Code CLI 会自动将 JSON 配置迁移到 TOML 格式，并将原文件备份为 `config.json.bak`。
 
 `--config-file` 指定的配置文件根据扩展名自动选择解析方式。`--config` 传入的配置内容会先尝试按 JSON 解析，失败后再尝试 TOML。

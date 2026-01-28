@@ -1,11 +1,9 @@
 ---
 name: translate-docs
-description: Translate and sync bilingual documentation. Use when user wants to translate docs between Chinese and English, sync translations, or ensure bilingual documentation consistency.
+description: Translate and sync bilingual documentation.
 ---
 
-# Translate Documentation
-
-现在我们正在为当前项目 Kimi CLI 编写和维护用户文档，文档内容在 docs 目录下，docs/AGENTS.md 中有对文档的说明。
+现在我们正在为当前项目 Kimi Code CLI 编写和维护用户文档，文档内容在 docs 目录下，docs/AGENTS.md 中有对文档的说明。
 
 中文文档和英文 changelog 已经确保是正确符合预期的，现在请你逐页、逐段地翻译文档内容，确保中英双语保持同步。
 

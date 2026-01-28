@@ -1,8 +1,81 @@
 # 变更记录
 
-本页面记录 Kimi CLI 各版本的变更内容。
+本页面记录 Kimi Code CLI 各版本的变更内容。
 
 ## 未发布
+
+## 1.2 (2026-01-27)
+
+- UI: 显示 `kimi-for-coding` 模型的说明
+
+## 1.1 (2026-01-27)
+
+- LLM: 修复 `kimi-for-coding` 模型的能力
+
+## 1.0 (2026-01-27)
+
+- Shell：添加 `/login` 和 `/logout` 斜杠命令，用于登录和登出
+- CLI：添加 `kimi login` 和 `kimi logout` 子命令
+- Core：修复子 Agent 审批请求处理问题
+
+## 0.88 (2026-01-26)
+
+- MCP：移除连接 MCP 服务器时的 `Mcp-Session-Id` header 以修复兼容性问题
+
+## 0.87 (2026-01-25)
+
+- Shell：修复 HTML 块出现在元素外时的 Markdown 渲染错误
+- Skills：添加更多用户级和项目级 Skills 目录候选
+- Core：改进系统提示词中的媒体文件生成和处理任务指引
+- Shell：修复 macOS 上从剪贴板粘贴图片的问题
+
+## 0.86 (2026-01-24)
+
+- Build：修复二进制构建问题
+
+## 0.85 (2026-01-24)
+
+- Shell：粘贴的图片缓存到磁盘，支持跨会话持久化
+- Shell：基于内容哈希去重缓存的附件
+- Shell：修复消息历史中图片/音频/视频附件的显示
+- Tool：使用文件路径作为 `ReadMediaFile` 中的媒体标识符，提高可追溯性
+- Tool：修复部分 MP4 文件无法识别为视频的问题
+- Shell：执行斜杠命令时支持 Ctrl-C 中断
+- Shell：修复 Shell 模式下输入不符合 Shell 语法的内容时的解析错误
+- Shell：修复 MCP 服务器和第三方库的 stderr 输出污染 Shell UI 的问题
+- Wire：优雅关闭，当连接关闭或收到 Ctrl-C 时正确清理待处理请求
+
+## 0.84 (2026-01-22)
+
+- Build：添加跨平台独立二进制构建，支持 Windows、macOS（含代码签名和公证）和 Linux（x86_64 和 ARM64）
+- Shell：修复斜杠命令自动补全在输入完整命令/别名时仍显示建议的问题
+- Tool：将 SVG 文件作为文本而非图片处理
+- Flow：支持 D2 markdown 块字符串（`|md` 语法），用于 Flow Skill 中的多行节点标签
+- Core：修复运行 `/reload`、`/setup` 或 `/clear` 后可能出现的 "event loop is closed" 错误
+- Core：修复在续接会话中使用 `/clear` 时的崩溃问题
+
+## 0.83 (2026-01-21)
+
+- Tool：添加 `ReadMediaFile` 工具用于读取图片/视频文件；`ReadFile` 现在仅用于读取文本文件
+- Skills：Flow Skills 现在也注册为 `/skill:<skill-name>` 命令（除了 `/flow:<skill-name>`）
+
+## 0.82 (2026-01-21)
+
+- Tool：`WriteFile` 和 `StrReplaceFile` 工具支持使用绝对路径编辑/写入工作目录外的文件
+- Tool：使用 Kimi 供应商时，视频文件上传到 Kimi Files API，使用 `ms://` 引用替代 inline data URL
+- Config：添加 `reserved_context_size` 配置项，自定义自动压缩触发阈值（默认 50000 tokens）
+
+## 0.81 (2026-01-21)
+
+- Skills：添加 Flow Skill 类型，在 SKILL.md 中内嵌 Agent Flow（Mermaid/D2），通过 `/flow:<skill-name>` 命令调用
+- CLI：移除 `--prompt-flow` 选项，改用 Flow Skills
+- Core：用 `/flow:<skill-name>` 命令替代原来的 `/begin` 命令
+
+## 0.80 (2026-01-20)
+
+- Wire：添加 `initialize` 方法，用于交换客户端/服务端信息、注册外部工具和公布斜杠命令
+- Wire：支持通过 Wire 协议调用外部工具
+- Wire：将 `ApprovalRequestResolved` 重命名为 `ApprovalResponse`（向后兼容）
 
 ## 0.79 (2026-01-19)
 
@@ -43,7 +116,7 @@
 ## 0.75 (2026-01-09)
 
 - Tool：改进 `ReadFile` 工具描述
-- Skills：添加内置 `kimi-cli-help` Skill，解答 Kimi CLI 使用和配置问题
+- Skills：添加内置 `kimi-cli-help` Skill，解答 Kimi Code CLI 使用和配置问题
 
 ## 0.74 (2026-01-09)
 
@@ -119,7 +192,7 @@
 - Lib：添加 `KimiToolset.load_mcp_tools` 方法，加载 MCP 工具
 - Lib：将 `MCPTool` 从 `kimi_cli.tools.mcp` 移至 `kimi_cli.soul.toolset`
 - Lib：添加 `InvalidToolError`、`MCPConfigError` 和 `MCPRuntimeError` 异常类
-- Lib：使 Kimi CLI 详细异常类扩展 `ValueError` 或 `RuntimeError`
+- Lib：使 Kimi Code CLI 详细异常类扩展 `ValueError` 或 `RuntimeError`
 - Lib：`KimiCLI.create` 和 `load_agent` 的 `mcp_configs` 参数支持传入验证后的 `list[fastmcp.mcp_config.MCPConfig]`
 - Lib：修复 `KimiCLI.create`、`load_agent`、`KimiToolset.load_tools` 和 `KimiToolset.load_mcp_tools` 的异常抛出
 - LLM：添加 `vertexai` 供应商类型，支持 Vertex AI

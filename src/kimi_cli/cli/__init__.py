@@ -154,17 +154,6 @@ def kimi(
             help="User prompt to the agent. Default: prompt interactively.",
         ),
     ] = None,
-    prompt_flow: Annotated[
-        Path | None,
-        typer.Option(
-            "--prompt-flow",
-            exists=True,
-            file_okay=True,
-            dir_okay=False,
-            readable=True,
-            help="D2 (.d2) or Mermaid (.mmd) flowchart file to run as a prompt flow.",
-        ),
-    ] = None,
     print_mode: Annotated[
         bool,
         typer.Option(
@@ -390,38 +379,6 @@ def kimi(
         if not prompt:
             raise typer.BadParameter("Prompt cannot be empty", param_hint="--prompt")
 
-    flow = None
-    if prompt_flow is not None:
-        from kimi_cli.flow import PromptFlowError
-        from kimi_cli.flow.d2 import parse_d2_flowchart
-        from kimi_cli.flow.mermaid import parse_mermaid_flowchart
-
-        if max_ralph_iterations is not None and max_ralph_iterations != 0:
-            raise typer.BadParameter(
-                "Prompt flow cannot be used with Ralph mode",
-                param_hint="--prompt-flow",
-            )
-        try:
-            flow_text = prompt_flow.read_text(encoding="utf-8")
-        except OSError as e:
-            raise typer.BadParameter(
-                f"Failed to read prompt flow file: {e}", param_hint="--prompt-flow"
-            ) from e
-        suffix = prompt_flow.suffix.lower()
-        if suffix in {".mmd", ".mermaid"}:
-            parser = parse_mermaid_flowchart
-        elif suffix == ".d2":
-            parser = parse_d2_flowchart
-        else:
-            raise typer.BadParameter(
-                "Unsupported prompt flow extension; use .mmd or .d2",
-                param_hint="--prompt-flow",
-            )
-        try:
-            flow = parser(flow_text)
-        except PromptFlowError as e:
-            raise typer.BadParameter(str(e), param_hint="--prompt-flow") from e
-
     if input_format is not None and ui != "print":
         raise typer.BadParameter(
             "Input format is only supported for print UI",
@@ -475,7 +432,13 @@ def kimi(
 
     work_dir = KaosPath.unsafe_from_local_path(local_work_dir) if local_work_dir else KaosPath.cwd()
 
-    async def _run(session_id: str | None) -> bool:
+    async def _run(session_id: str | None) -> tuple[Session, bool]:
+        """
+        Create/load session and run the CLI instance.
+
+        Returns:
+            The session and whether the run succeeded.
+        """
         if session_id is not None:
             session = await Session.find(work_dir, session_id)
             if session is None:
@@ -508,7 +471,6 @@ def kimi(
             max_steps_per_turn=max_steps_per_turn,
             max_retries_per_step=max_retries_per_step,
             max_ralph_iterations=max_ralph_iterations,
-            flow=flow,
         )
         match ui:
             case "shell":
@@ -531,54 +493,157 @@ def kimi(
                 await instance.run_wire_stdio()
                 succeeded = True
 
-        if succeeded:
-            metadata = load_metadata()
+        return session, succeeded
 
-            # Update work_dir metadata with last session
-            work_dir_meta = metadata.get_work_dir_meta(session.work_dir)
+    async def _post_run(last_session: Session, succeeded: bool) -> None:
+        if not succeeded:
+            return
 
-            if work_dir_meta is None:
-                logger.warning(
-                    "Work dir metadata missing when marking last session, recreating: {work_dir}",
-                    work_dir=session.work_dir,
-                )
-                work_dir_meta = metadata.new_work_dir_meta(session.work_dir)
+        metadata = load_metadata()
 
-            if session.is_empty():
-                logger.info(
-                    "Session {session_id} has empty context, removing it",
-                    session_id=session.id,
-                )
-                await session.delete()
-                if work_dir_meta.last_session_id == session.id:
-                    work_dir_meta.last_session_id = None
-            else:
-                work_dir_meta.last_session_id = session.id
+        # Update work_dir metadata with last session
+        work_dir_meta = metadata.get_work_dir_meta(last_session.work_dir)
 
-            save_metadata(metadata)
+        if work_dir_meta is None:
+            logger.warning(
+                "Work dir metadata missing when marking last session, recreating: {work_dir}",
+                work_dir=last_session.work_dir,
+            )
+            work_dir_meta = metadata.new_work_dir_meta(last_session.work_dir)
 
-        return succeeded
+        if last_session.is_empty():
+            logger.info(
+                "Session {session_id} has empty context, removing it",
+                session_id=last_session.id,
+            )
+            await last_session.delete()
+            if work_dir_meta.last_session_id == last_session.id:
+                work_dir_meta.last_session_id = None
+        else:
+            work_dir_meta.last_session_id = last_session.id
 
-    while True:
-        try:
-            succeeded = asyncio.run(_run(session_id))
-            session_id = None
-            if not succeeded:
-                raise typer.Exit(code=1)
-            break
-        except Reload as e:
-            session_id = e.session_id
-            continue
+        save_metadata(metadata)
+
+    async def _reload_loop(session_id: str | None):
+        while True:
+            try:
+                last_session, succeeded = await _run(session_id)
+                break
+            except Reload as e:
+                session_id = e.session_id
+                continue
+        await _post_run(last_session, succeeded)
+
+    asyncio.run(_reload_loop(session_id))
 
 
 cli.add_typer(info_cli, name="info")
+
+
+@cli.command()
+def login(
+    json: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit OAuth events as JSON lines.",
+    ),
+) -> None:
+    """Login to your Kimi account."""
+    from rich.console import Console
+    from rich.status import Status
+
+    from kimi_cli.auth.oauth import login_kimi_code
+    from kimi_cli.config import load_config
+
+    async def _run() -> bool:
+        if json:
+            ok = True
+            async for event in login_kimi_code(load_config()):
+                typer.echo(event.json)
+                if event.type == "error":
+                    ok = False
+            return ok
+
+        console = Console()
+        ok = True
+        status: Status | None = None
+        try:
+            async for event in login_kimi_code(load_config()):
+                if event.type == "waiting":
+                    if status is None:
+                        status = console.status("Waiting for user authorization...")
+                        status.start()
+                    continue
+                if status is not None:
+                    status.stop()
+                    status = None
+                match event.type:
+                    case "error":
+                        style = "red"
+                    case "success":
+                        style = "green"
+                    case _:
+                        style = None
+                console.print(event.message, markup=False, style=style)
+                if event.type == "error":
+                    ok = False
+        finally:
+            if status is not None:
+                status.stop()
+        return ok
+
+    ok = asyncio.run(_run())
+    if not ok:
+        raise typer.Exit(code=1)
+
+
+@cli.command()
+def logout(
+    json: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit OAuth events as JSON lines.",
+    ),
+) -> None:
+    """Logout from your Kimi account."""
+    from rich.console import Console
+
+    from kimi_cli.auth.oauth import logout_kimi_code
+    from kimi_cli.config import load_config
+
+    async def _run() -> bool:
+        ok = True
+        if json:
+            async for event in logout_kimi_code(load_config()):
+                typer.echo(event.json)
+                if event.type == "error":
+                    ok = False
+            return ok
+
+        console = Console()
+        async for event in logout_kimi_code(load_config()):
+            match event.type:
+                case "error":
+                    style = "red"
+                case "success":
+                    style = "green"
+                case _:
+                    style = None
+            console.print(event.message, markup=False, style=style)
+            if event.type == "error":
+                ok = False
+        return ok
+
+    ok = asyncio.run(_run())
+    if not ok:
+        raise typer.Exit(code=1)
 
 
 @cli.command(context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
 def term(
     ctx: typer.Context,
 ) -> None:
-    """Run Toad TUI backed by Kimi CLI ACP server."""
+    """Run Toad TUI backed by Kimi Code CLI ACP server."""
     from .toad import run_term
 
     run_term(ctx)
@@ -586,7 +651,7 @@ def term(
 
 @cli.command()
 def acp():
-    """Run Kimi CLI ACP server."""
+    """Run Kimi Code CLI ACP server."""
     from kimi_cli.acp import acp_main
 
     acp_main()

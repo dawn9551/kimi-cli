@@ -8,15 +8,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.shortcuts.choice_input import ChoiceInput
 from pydantic import SecretStr
 
-from kimi_cli.config import (
-    LLMModel,
-    LLMProvider,
-    MoonshotFetchConfig,
-    MoonshotSearchConfig,
-    load_config,
-    save_config,
-)
-from kimi_cli.platforms import (
+from kimi_cli.auth.platforms import (
     PLATFORMS,
     ModelInfo,
     Platform,
@@ -24,6 +16,14 @@ from kimi_cli.platforms import (
     list_models,
     managed_model_key,
     managed_provider_key,
+)
+from kimi_cli.config import (
+    LLMModel,
+    LLMProvider,
+    MoonshotFetchConfig,
+    MoonshotSearchConfig,
+    load_config,
+    save_config,
 )
 from kimi_cli.ui.shell.console import console
 from kimi_cli.ui.shell.slash import registry
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 @registry.command
 async def setup(app: Shell, args: str):
-    """Setup Kimi CLI"""
+    """Setup Kimi Code CLI"""
     result = await _setup()
     if not result:
         # error message already printed
@@ -75,7 +75,7 @@ async def setup(app: Shell, args: str):
         )
 
     save_config(config)
-    console.print("[green]✓[/green] Kimi CLI has been setup! Reloading...")
+    console.print("[green]✓[/green] Kimi Code CLI has been setup! Reloading...")
     await asyncio.sleep(1)
     console.clear()
 

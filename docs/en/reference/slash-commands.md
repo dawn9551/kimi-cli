@@ -1,6 +1,6 @@
 # Slash Commands
 
-Slash commands are built-in commands for Kimi CLI, used to control sessions, configuration, and debugging. Enter a command starting with `/` in the input box to trigger.
+Slash commands are built-in commands for Kimi Code CLI, used to control sessions, configuration, and debugging. Enter a command starting with `/` in the input box to trigger.
 
 ::: tip Shell mode
 Some slash commands are also available in shell mode, including `/help`, `/exit`, `/version`, `/changelog`, and `/feedback`.
@@ -16,7 +16,7 @@ Aliases: `/h`, `/?`
 
 ### `/version`
 
-Display Kimi CLI version number.
+Display Kimi Code CLI version number.
 
 ### `/changelog`
 
@@ -28,11 +28,23 @@ Alias: `/release-notes`
 
 Open the GitHub Issues page to submit feedback.
 
-## Configuration and debugging
+## Account and configuration
+
+### `/login`
+
+Log in to your Kimi account. This automatically opens a browser; complete account authorization and available models will be automatically configured. After successful login, Kimi Code CLI will automatically reload the configuration.
+
+::: tip
+This command is only available when using the default configuration file. If a configuration was specified via `--config` or `--config-file`, this command cannot be used.
+:::
+
+### `/logout`
+
+Log out from your Kimi account. This clears stored OAuth credentials and removes related configuration from the config file. After logout, Kimi Code CLI will automatically reload the configuration.
 
 ### `/setup`
 
-Start the configuration wizard to set up API platform and model.
+Start the configuration wizard to set up API platform and model using an API key.
 
 Configuration flow:
 1. Select an API platform (Kimi Code, Moonshot AI Open Platform, etc.)
@@ -47,7 +59,7 @@ Switch models and thinking mode.
 
 This command first refreshes the available models list from the API platform. When called without arguments, displays an interactive selection interface where you first select a model, then choose whether to enable thinking mode (if the model supports it).
 
-After selection, Kimi CLI will automatically update the configuration file and reload.
+After selection, Kimi Code CLI will automatically update the configuration file and reload.
 
 ::: tip
 This command is only available when using the default configuration file. If a configuration was specified via `--config` or `--config-file`, this command cannot be used.
@@ -55,7 +67,7 @@ This command is only available when using the default configuration file. If a c
 
 ### `/reload`
 
-Reload the configuration file without exiting Kimi CLI.
+Reload the configuration file without exiting Kimi Code CLI.
 
 ### `/debug`
 
@@ -102,13 +114,13 @@ Alias: `/reset`
 
 Manually compact the context to reduce token usage.
 
-When the context is too long, Kimi CLI will automatically trigger compaction. This command allows manually triggering the compaction process.
+When the context is too long, Kimi Code CLI will automatically trigger compaction. This command allows manually triggering the compaction process.
 
 ## Skills
 
 ### `/skill:<name>`
 
-Load a specific skill, sending the `SKILL.md` content to the Agent as a prompt.
+Load a specific skill, sending the `SKILL.md` content to the Agent as a prompt. This command works for both standard skills and flow skills.
 
 For example:
 
@@ -117,6 +129,25 @@ For example:
 - `/skill:git-commits fix user login issue`: Load the skill with an additional task description
 
 You can append additional text after the command, which will be added to the skill prompt. See [Agent Skills](../customization/skills.md) for details.
+
+::: tip
+Flow skills can also be invoked via `/skill:<name>`, which loads the content as a standard skill without automatically executing the flow. To execute the flow, use `/flow:<name>` instead.
+:::
+
+### `/flow:<name>`
+
+Execute a specific flow skill. Flow skills embed an Agent Flow diagram in `SKILL.md`. After execution, the Agent will start from the `BEGIN` node and process each node according to the flow diagram definition until reaching the `END` node.
+
+For example:
+
+- `/flow:code-review`: Execute code review workflow
+- `/flow:release`: Execute release workflow
+
+::: tip
+Flow skills can also be invoked via `/skill:<name>`, which loads the content as a standard skill without automatically executing the flow.
+:::
+
+See [Agent Skills](../customization/skills.md#flow-skills) for details.
 
 ## Others
 
@@ -133,12 +164,6 @@ Toggle YOLO mode. When enabled, all operations are automatically approved and a 
 ::: warning Note
 YOLO mode skips all confirmations. Make sure you understand the potential risks.
 :::
-
-### `/begin`
-
-Start Prompt Flow execution.
-
-This command is only available when a flowchart has been loaded via `--prompt-flow`. After execution, the agent will start from the `BEGIN` node and process each node according to the flowchart definition until reaching the `END` node. See [`kimi` command](./kimi-command.md#prompt-flow) for details.
 
 ## Command completion
 

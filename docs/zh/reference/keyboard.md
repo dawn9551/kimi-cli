@@ -1,6 +1,6 @@
 # 键盘快捷键
 
-Kimi CLI Shell 模式支持以下键盘快捷键。
+Kimi Code CLI Shell 模式支持以下键盘快捷键。
 
 ## 快捷键列表
 
@@ -12,7 +12,7 @@ Kimi CLI Shell 模式支持以下键盘快捷键。
 | `Alt-Enter` | 插入换行（同 `Ctrl-J`） |
 | `Ctrl-V` | 粘贴（支持图片） |
 | `Ctrl-E` | 展开审批请求完整内容 |
-| `Ctrl-D` | 退出 Kimi CLI |
+| `Ctrl-D` | 退出 Kimi Code CLI |
 | `Ctrl-C` | 中断当前操作 |
 
 ## 模式切换
@@ -70,12 +70,13 @@ Kimi CLI Shell 模式支持以下键盘快捷键。
 
 ### `Ctrl-D`：退出
 
-在输入框为空时按 `Ctrl-D` 退出 Kimi CLI。
+在输入框为空时按 `Ctrl-D` 退出 Kimi Code CLI。
 
 ### `Ctrl-C`：中断
 
 - 在输入框中：清空当前输入
 - Agent 运行时：中断当前操作
+- 斜杠命令执行时：中断命令
 
 ## 补全操作
 

@@ -1,6 +1,6 @@
 # `kimi` Command
 
-`kimi` is the main command for Kimi CLI, used to start interactive sessions or execute single queries.
+`kimi` is the main command for Kimi Code CLI, used to start interactive sessions or execute single queries.
 
 ```sh
 kimi [OPTIONS] COMMAND [ARGS]
@@ -45,7 +45,7 @@ kimi [OPTIONS] COMMAND [ARGS]
 |--------|-------|-------------|
 | `--work-dir PATH` | `-w` | Specify working directory (default current directory) |
 
-The working directory determines the root directory for file operations. The agent can only read and write files within this directory.
+The working directory determines the root directory for file operations. Relative paths work within the working directory; absolute paths are required to access files outside it.
 
 ## Session management
 
@@ -63,7 +63,7 @@ The working directory determines the root directory for file operations. The age
 | `--prompt TEXT` | `-p` | Pass user prompt, doesn't enter interactive mode |
 | `--command TEXT` | `-c` | Alias for `--prompt` |
 
-When using `--prompt` (or `--command`), Kimi CLI exits after processing the query (unless `--print` is specified, results are still displayed in interactive mode).
+When using `--prompt` (or `--command`), Kimi Code CLI exits after processing the query (unless `--print` is specified, results are still displayed in interactive mode).
 
 ## Loop control
 
@@ -77,57 +77,7 @@ When using `--prompt` (or `--command`), Kimi CLI exits after processing the quer
 
 [Ralph](https://ghuntley.com/ralph/) is a technique that puts an agent in a loop: the same prompt is fed again and again so the agent can keep iterating one big task.
 
-When `--max-ralph-iterations` is not `0`, Kimi CLI enters Ralph Loop mode and automatically loops through task execution based on an internal Prompt Flow, until the agent outputs `<choice>STOP</choice>` or the iteration limit is reached.
-
-::: info Note
-Ralph Loop is mutually exclusive with the `--prompt-flow` option and cannot be used together.
-:::
-
-## Prompt Flow
-
-| Option | Description |
-|--------|-------------|
-| `--prompt-flow PATH` | Load a D2 (`.d2`) or Mermaid (`.mmd`) flowchart file as a Prompt Flow |
-
-Prompt Flow is a prompt workflow description method based on flowcharts, where each node corresponds to one conversation turn. After loading, you can start the flow execution with the `/begin` slash command. Both D2 and Mermaid flowchart formats are supported. You can edit and preview D2 flowcharts at [D2 Playground](https://play.d2lang.com), and Mermaid flowcharts at [Mermaid Playground](https://www.mermaidchart.com/play).
-
-D2 flowchart example (`example.d2` file):
-
-```
-BEGIN -> B -> C
-B: Analyze existing code, write design doc for XXX feature in design.md
-C: Review design.md, is it detailed enough?
-C -> B: No
-C -> D: Yes
-D: Start implementation
-D -> END
-```
-
-Mermaid flowchart example (`example.mmd` file):
-
-```
-flowchart TD
-A([BEGIN]) --> B[Analyze existing code, write design doc for XXX feature in design.md]
-B --> C{Review design.md, is it detailed enough?}
-C -->|Yes| D[Start implementation]
-C -->|No| B
-D --> F([END])
-```
-
-```mermaid
-flowchart TD
-A([BEGIN]) --> B[Analyze existing code, write design doc for XXX feature in design.md]
-B --> C{Review design.md, is it detailed enough?}
-C -->|Yes| D[Start implementation]
-C -->|No| B
-D --> F([END])
-```
-
-During node processing, decision nodes require the agent to output `<choice>branch name</choice>` to select the next node.
-
-::: info Note
-`--prompt-flow` is mutually exclusive with Ralph Loop mode and cannot be used together.
-:::
+When `--max-ralph-iterations` is not `0`, Kimi Code CLI enters Ralph Loop mode and automatically loops through task execution until the agent outputs `<choice>STOP</choice>` or the iteration limit is reached.
 
 ## UI modes
 
@@ -186,15 +136,33 @@ Thinking mode requires model support. If not specified, uses the last session's 
 
 | Option | Description |
 |--------|-------------|
-| `--skills-dir PATH` | Specify skills directory (default `~/.kimi/skills`) |
+| `--skills-dir PATH` | Specify skills directory, skipping auto-discovery |
 
-See [Agent Skills](../customization/skills.md) for details.
+When not specified, Kimi Code CLI automatically discovers user-level and project-level skills directories in priority order. See [Agent Skills](../customization/skills.md) for details.
 
 ## Subcommands
 
 | Subcommand | Description |
 |------------|-------------|
+| [`kimi login`](#kimi-login) | Log in to your Kimi account |
+| [`kimi logout`](#kimi-logout) | Log out from your Kimi account |
 | [`kimi info`](./kimi-info.md) | Display version and protocol information |
 | [`kimi acp`](./kimi-acp.md) | Start multi-session ACP server |
 | [`kimi mcp`](./kimi-mcp.md) | Manage MCP server configuration |
 | [`kimi term`](./kimi-term.md) | Launch the Toad terminal UI |
+
+### `kimi login`
+
+Log in to your Kimi account. This automatically opens a browser; complete account authorization and available models will be automatically configured.
+
+```sh
+kimi login
+```
+
+### `kimi logout`
+
+Log out from your Kimi account. This clears stored OAuth credentials and removes related configuration from the config file.
+
+```sh
+kimi logout
+```

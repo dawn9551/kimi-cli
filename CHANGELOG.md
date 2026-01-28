@@ -11,6 +11,79 @@ Only write entries that are worth mentioning to users.
 
 ## Unreleased
 
+## 1.2 (2026-01-27)
+
+- UI: Show description for `kimi-for-coding` model
+
+## 1.1 (2026-01-27)
+
+- LLM: Fix `kimi-for-coding` model's capabilities
+
+## 1.0 (2026-01-27)
+
+- Shell: Add `/login` and `/logout` slash commands for login and logout
+- CLI: Add `kimi login` and `kimi logout` subcommands
+- Core: Fix subagent approval request handling
+
+## 0.88 (2026-01-26)
+
+- MCP: Remove `Mcp-Session-Id` header when connecting to MCP servers to fix compatibility
+
+## 0.87 (2026-01-25)
+
+- Shell: Fix Markdown rendering error when HTML blocks appear outside any element
+- Skills: Add more user-level and project-level skills directory candidates
+- Core: Improve system prompt guidance for media file generation and processing tasks
+- Shell: Fix image pasting from clipboard on macOS
+
+## 0.86 (2026-01-24)
+
+- Build: Fix binary builds
+
+## 0.85 (2026-01-24)
+
+- Shell: Cache pasted images to disk for persistence across sessions
+- Shell: Deduplicate cached attachments based on content hash
+- Shell: Fix display of image/audio/video attachments in message history
+- Tool: Use file path as media identifier in `ReadMediaFile` for better traceability
+- Tool: Fix some MP4 files not being recognized as videos
+- Shell: Handle Ctrl-C during slash command execution
+- Shell: Fix shlex parsing error in shell mode when input contains invalid shell syntax
+- Shell: Fix stderr output from MCP servers and third-party libraries polluting shell UI
+- Wire: Graceful shutdown with proper cleanup of pending requests when connection closes or Ctrl-C is received
+
+## 0.84 (2026-01-22)
+
+- Build: Add cross-platform standalone binary builds for Windows, macOS (with code signing and notarization), and Linux (x86_64 and ARM64)
+- Shell: Fix slash command autocomplete showing suggestions for exact command/alias matches
+- Tool: Treat SVG files as text instead of images
+- Flow: Support D2 markdown block strings (`|md` syntax) for multiline node labels in flow skills
+- Core: Fix possible "event loop is closed" error after running `/reload`, `/setup`, or `/clear`
+- Core: Fix panic when `/clear` is used in a continued session
+
+## 0.83 (2026-01-21)
+
+- Tool: Add `ReadMediaFile` tool for reading image/video files; `ReadFile` now focuses on text files only
+- Skills: Flow skills now also register as `/skill:<skill-name>` commands (in addition to `/flow:<skill-name>`)
+
+## 0.82 (2026-01-21)
+
+- Tool: Allow `WriteFile` and `StrReplaceFile` tools to edit/write files outside the working directory when using absolute paths
+- Tool: Upload videos to Kimi files API when using Kimi provider, replacing inline data URLs with `ms://` references
+- Config: Add `reserved_context_size` setting to customize auto-compaction trigger threshold (default: 50000 tokens)
+
+## 0.81 (2026-01-21)
+
+- Skills: Add flow skill type with embedded Agent Flow (Mermaid/D2) in SKILL.md, invoked via `/flow:<skill-name>` commands
+- CLI: Remove `--prompt-flow` option; use flow skills instead
+- Core: Replace `/begin` command with `/flow:<skill-name>` commands for flow skills
+
+## 0.80 (2026-01-20)
+
+- Wire: Add `initialize` method for exchanging client/server info, external tools registration and slash commands advertisement
+- Wire: Support external tool calls via Wire protocol
+- Wire: Rename `ApprovalRequestResolved` to `ApprovalResponse` (backwards-compatible)
+
 ## 0.79 (2026-01-19)
 
 - Skills: Add project-level skills support, discovered from `.agents/skills/` (or `.kimi/skills/`, `.claude/skills/`)
@@ -50,7 +123,7 @@ Only write entries that are worth mentioning to users.
 ## 0.75 (2026-01-09)
 
 - Tool: Improve `ReadFile` tool description
-- Skills: Add built-in `kimi-cli-help` skill to answer Kimi CLI usage and configuration questions
+- Skills: Add built-in `kimi-cli-help` skill to answer Kimi Code CLI usage and configuration questions
 
 ## 0.74 (2026-01-09)
 
@@ -126,7 +199,7 @@ Only write entries that are worth mentioning to users.
 - Lib: Add `KimiToolset.load_mcp_tools` method to load MCP tools
 - Lib: Move `MCPTool` from `kimi_cli.tools.mcp` to `kimi_cli.soul.toolset`
 - Lib: Add `InvalidToolError`, `MCPConfigError` and `MCPRuntimeError`
-- Lib: Make the detailed Kimi CLI exception classes extend `ValueError` or `RuntimeError`
+- Lib: Make the detailed Kimi Code CLI exception classes extend `ValueError` or `RuntimeError`
 - Lib: Allow passing validated `list[fastmcp.mcp_config.MCPConfig]` as `mcp_configs` for `KimiCLI.create` and `load_agent`
 - Lib: Fix exception raising for `KimiCLI.create`, `load_agent`, `KimiToolset.load_tools` and `KimiToolset.load_mcp_tools`
 - LLM: Add provider type `vertexai` to support Vertex AI

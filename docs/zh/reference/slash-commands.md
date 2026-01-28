@@ -1,6 +1,6 @@
 # 斜杠命令
 
-斜杠命令是 Kimi CLI 的内置命令，用于控制会话、配置和调试。在输入框中输入 `/` 开头的命令即可触发。
+斜杠命令是 Kimi Code CLI 的内置命令，用于控制会话、配置和调试。在输入框中输入 `/` 开头的命令即可触发。
 
 ::: tip Shell 模式
 部分斜杠命令在 Shell 模式下也可以使用，包括 `/help`、`/exit`、`/version`、`/changelog` 和 `/feedback`。
@@ -16,7 +16,7 @@
 
 ### `/version`
 
-显示 Kimi CLI 版本号。
+显示 Kimi Code CLI 版本号。
 
 ### `/changelog`
 
@@ -28,11 +28,23 @@
 
 打开 GitHub Issues 页面提交反馈。
 
-## 配置与调试
+## 账号与配置
+
+### `/login`
+
+登录 Kimi 账号。执行后会自动打开浏览器，完成账号授权后自动配置可用的模型。登录成功后 Kimi Code CLI 会自动重新加载配置。
+
+::: tip 提示
+此命令仅在使用默认配置文件时可用。如果通过 `--config` 或 `--config-file` 指定了配置，则无法使用此命令。
+:::
+
+### `/logout`
+
+登出 Kimi 账号。会清理存储的 OAuth 凭据并移除配置文件中的相关配置。登出后 Kimi Code CLI 会自动重新加载配置。
 
 ### `/setup`
 
-启动配置向导，设置 API 平台和模型。
+启动配置向导，通过 API 密钥配置平台和模型。
 
 配置流程：
 1. 选择 API 平台（Kimi Code、Moonshot AI 开放平台等）
@@ -47,7 +59,7 @@
 
 此命令会先从 API 平台刷新可用模型列表。不带参数调用时，显示交互式选择界面，首先选择模型，然后选择是否开启 Thinking 模式（如果模型支持）。
 
-选择完成后，Kimi CLI 会自动更新配置文件并重新加载。
+选择完成后，Kimi Code CLI 会自动更新配置文件并重新加载。
 
 ::: tip 提示
 此命令仅在使用默认配置文件时可用。如果通过 `--config` 或 `--config-file` 指定了配置，则无法使用此命令。
@@ -55,7 +67,7 @@
 
 ### `/reload`
 
-重新加载配置文件，无需退出 Kimi CLI。
+重新加载配置文件，无需退出 Kimi Code CLI。
 
 ### `/debug`
 
@@ -102,13 +114,13 @@
 
 手动压缩上下文，减少 token 使用。
 
-当上下文过长时，Kimi CLI 会自动触发压缩。此命令可手动触发压缩过程。
+当上下文过长时，Kimi Code CLI 会自动触发压缩。此命令可手动触发压缩过程。
 
 ## Skills
 
 ### `/skill:<name>`
 
-加载指定的 Skill，将 `SKILL.md` 内容作为提示词发送给 Agent。
+加载指定的 Skill，将 `SKILL.md` 内容作为提示词发送给 Agent。此命令适用于普通 Skill 和 Flow Skill。
 
 例如：
 
@@ -117,6 +129,25 @@
 - `/skill:git-commits 修复用户登录问题`：加载 Skill 并附带额外的任务描述
 
 命令后面可以附带额外的文本，这些内容会追加到 Skill 提示词之后。详见 [Agent Skills](../customization/skills.md)。
+
+::: tip 提示
+Flow Skill 也可以通过 `/skill:<name>` 调用，此时作为普通 Skill 加载内容，不会自动执行流程。如需执行流程，请使用 `/flow:<name>`。
+:::
+
+### `/flow:<name>`
+
+执行指定的 Flow Skill。Flow Skill 在 `SKILL.md` 中内嵌 Agent Flow 流程图，执行后 Agent 会从 `BEGIN` 节点开始，按照流程图定义依次处理每个节点，直到到达 `END` 节点。
+
+例如：
+
+- `/flow:code-review`：执行代码审查工作流
+- `/flow:release`：执行发布工作流
+
+::: tip 提示
+Flow Skill 也可以通过 `/skill:<name>` 调用，此时作为普通 Skill 加载内容，不会自动执行流程。
+:::
+
+详见 [Agent Skills](../customization/skills.md#flow-skills)。
 
 ## 其他
 
@@ -133,12 +164,6 @@
 ::: warning 注意
 YOLO 模式会跳过所有确认，请确保你了解可能的风险。
 :::
-
-### `/begin`
-
-启动 Prompt Flow 执行。
-
-此命令仅在通过 `--prompt-flow` 加载了流程图时可用。执行后，Agent 会从 `BEGIN` 节点开始，按照流程图的定义依次处理每个节点，直到达到 `END` 节点。详见 [`kimi` 命令](./kimi-command.md#prompt-flow)。
 
 ## 命令补全
 

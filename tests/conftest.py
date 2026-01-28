@@ -17,6 +17,7 @@ from kosong.chat_provider.mock import MockChatProvider
 from kosong.tooling.empty import EmptyToolset
 from pydantic import SecretStr
 
+from kimi_cli.auth.oauth import OAuthManager
 from kimi_cli.config import Config, MoonshotSearchConfig, get_default_config
 from kimi_cli.llm import ALL_MODEL_CAPABILITIES, LLM
 from kimi_cli.metadata import WorkDirMeta
@@ -29,6 +30,7 @@ from kimi_cli.tools.dmail import SendDMail
 from kimi_cli.tools.file.glob import Glob
 from kimi_cli.tools.file.grep_local import Grep
 from kimi_cli.tools.file.read import ReadFile
+from kimi_cli.tools.file.read_media import ReadMediaFile
 from kimi_cli.tools.file.replace import StrReplaceFile
 from kimi_cli.tools.file.write import WriteFile
 from kimi_cli.tools.multiagent.create import CreateSubagent
@@ -39,6 +41,7 @@ from kimi_cli.tools.todo import SetTodoList
 from kimi_cli.tools.web.fetch import FetchURL
 from kimi_cli.tools.web.search import SearchWeb
 from kimi_cli.utils.environment import Environment
+from kimi_cli.wire.file import WireFile
 
 
 @pytest.fixture
@@ -109,7 +112,8 @@ def session(temp_work_dir: KaosPath, temp_share_dir: Path) -> Session:
         id="test",
         work_dir=temp_work_dir,
         work_dir_meta=WorkDirMeta(path=str(temp_work_dir), kaos=get_current_kaos().name),
-        context_file=temp_share_dir / "history.jsonl",
+        context_file=temp_share_dir / "context.jsonl",
+        wire_file=WireFile(path=temp_share_dir / "wire.jsonl"),
         title="Test Session",
         updated_at=0.0,
     )
@@ -170,6 +174,7 @@ def runtime(
         labor_market=labor_market,
         environment=environment,
         skills={},
+        oauth=OAuthManager(config),
     )
     rt.labor_market.add_fixed_subagent(
         "mocker",
@@ -248,6 +253,12 @@ def read_file_tool(runtime: Runtime) -> ReadFile:
 
 
 @pytest.fixture
+def read_media_file_tool(runtime: Runtime) -> ReadMediaFile:
+    """Create a ReadMediaFile tool instance."""
+    return ReadMediaFile(runtime)
+
+
+@pytest.fixture
 def glob_tool(builtin_args: BuiltinSystemPromptArgs) -> Glob:
     """Create a Glob tool instance."""
     return Glob(builtin_args)
@@ -278,24 +289,22 @@ def str_replace_file_tool(
 
 
 @pytest.fixture
-def search_web_tool(config: Config) -> SearchWeb:
+def search_web_tool(config: Config, runtime: Runtime) -> SearchWeb:
     """Create a SearchWeb tool instance."""
-    return SearchWeb(config)
+    return SearchWeb(config, runtime)
 
 
 @pytest.fixture
-def fetch_url_tool(config: Config) -> FetchURL:
+def fetch_url_tool(config: Config, runtime: Runtime) -> FetchURL:
     """Create a FetchURL tool instance."""
-    return FetchURL(config)
+    return FetchURL(config, runtime)
 
 
 # misc fixtures
 
 
 @pytest.fixture
-def outside_file() -> Path:
+def outside_file() -> Generator[Path]:
     """Return a path to a file outside the working directory."""
-    if platform.system() == "Windows":
-        return Path("C:/outside_file.txt")
-    else:
-        return Path("/outside_file.txt")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        yield Path(tmpdir) / "outside_file.txt"
